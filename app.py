@@ -3,7 +3,7 @@ import time
 
 st.set_page_config(page_title="Pediatric RR Counter", layout="centered")
 
-# CSS المطور لمنع الضغط الخطأ وتكبير الزر
+# CSS لتخصيص الواجهة ومنع الأخطاء
 st.markdown("""
     <style>
     .block-container {
@@ -12,6 +12,7 @@ st.markdown("""
         padding-right: 0rem !important;
         max-width: 100% !important;
     }
+    /* الزر الرئيسي العملاق */
     .stButton > button {
         width: 100vw !important;
         height: 65vh !important;
@@ -21,14 +22,21 @@ st.markdown("""
         background-color: #ff4b4b !important;
         border: none !important;
     }
-    /* تنسيق خاص لزر Restart ليكون مختلفاً وبعيداً */
-    .restart-btn > div > button {
-        height: 80px !important;
-        width: 200px !important;
-        font-size: 20px !important;
-        background-color: #333 !important;
-        margin-top: 50px !important;
-        border-radius: 10px !important;
+    /* زر Restart الصغير جداً في الزاوية */
+    .restart-container {
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 10px;
+        margin-top: 100px;
+    }
+    .restart-container div div button {
+        height: 30px !important;
+        width: 100px !important;
+        font-size: 12px !important;
+        background-color: #f0f2f6 !important;
+        color: #333 !important;
+        border: 1px solid #ccc !important;
+        border-radius: 5px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -54,14 +62,12 @@ def count_breath():
             st.session_state.finished = True
 
 if not st.session_state.finished:
-    # منطقة الضغط العمياء
     st.button("TAP ANYWHERE", on_click=count_breath)
     
     if st.session_state.start_time:
         elapsed = time.time() - st.session_state.start_time
         remaining = max(0, 15 - int(elapsed))
         st.metric("⏱ Time Left", f"{remaining}s")
-        
         if remaining > 0:
             time.sleep(0.1)
             st.rerun()
@@ -69,19 +75,14 @@ if not st.session_state.finished:
             st.session_state.finished = True
             st.rerun()
 else:
-    # عرض النتائج في منطقة آمنة بعيدة عن مكان الضغط السابق
+    # عرض النتيجة بشكل واضح وكبير
     final_rr = st.session_state.count * 4
     st.balloons()
-    st.markdown(f"<h1 style='text-align: center; color: green;'>RR: {final_rr} bpm</h1>", unsafe_allow_html=True)
-    st.write(f"Total breaths recorded: {st.session_state.count}")
+    st.markdown(f"<div style='text-align: center;'><h3 style='color: grey;'>Final Result</h3><h1 style='font-size: 100px; color: #2e7d32;'>{final_rr}</h1><p>bpm</p></div>", unsafe_allow_html=True)
     
-    # مساحة فارغة لضمان عدم الضغط بالخطأ
-    st.write("")
-    st.write("")
-    
-    # زر Restart صغير وبعيد في حاوية منفصلة
-    st.markdown('<div class="restart-btn">', unsafe_allow_html=True)
-    if st.button("New Calculation"):
+    # وضع زر إعادة التشغيل في حاوية "الزاوية البعيدة"
+    st.markdown('<div class="restart-container">', unsafe_allow_html=True)
+    if st.button("Reset"):
         st.session_state.count = 0
         st.session_state.start_time = None
         st.session_state.finished = False

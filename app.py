@@ -1,36 +1,32 @@
 import streamlit as st
 import time
 
-# إعداد الصفحة وتكبير الخط
+# إعداد الصفحة
 st.set_page_config(page_title="Pediatric RR Counter", layout="centered")
 
-# كود CSS لجعل الزر ضخماً جداً ودائرياً
+# CSS لجعل الزر عملاقاً وملء الشاشة تقريباً
 st.markdown("""
     <style>
-    div.stButton > button:first-child {
-        background-color: #ff4b4b;
-        color: white;
-        height: 300px;
-        width: 300px;
-        border-radius: 50%;
-        border: 10px solid #ff2b2b;
-        font-size: 30px;
+    .stButton > button {
+        width: 100%;
+        height: 60vh;
+        font-size: 50px !important;
         font-weight: bold;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        color: white !important;
+        background-color: #ff4b4b !important;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        transition: transform 0.1s;
     }
-    div.stButton > button:hover {
-        background-color: #ff2b2b;
-        color: white;
-        border: 10px solid white;
+    .stButton > button:active {
+        transform: scale(0.95);
+        background-color: #cc0000 !important;
     }
     </style>
-""", unsafe_allow_stdio=True)
+""", unsafe_allow_html=True)
 
 st.title("🫁 Pediatric RR Counter")
-st.write("Click the RED CIRCLE for each breath. Starts on first tap.")
 
 if 'count' not in st.session_state:
     st.session_state.count = 0
@@ -39,29 +35,27 @@ if 'start_time' not in st.session_state:
 if 'finished' not in st.session_state:
     st.session_state.finished = False
 
-# منطق العمل
 def count_breath():
     if not st.session_state.finished:
         if st.session_state.start_time is None:
             st.session_state.start_time = time.time()
         
         elapsed = time.time() - st.session_state.start_time
-        
         if elapsed < 15:
             st.session_state.count += 1
         else:
             st.session_state.finished = True
 
-# عرض الزر والنتائج
+# عرض الواجهة
 if not st.session_state.finished:
-    # سيظهر هذا الزر كدائرة حمراء ضخمة بفضل الـ CSS أعلاه
-    st.button("TAP", on_click=count_breath)
+    # زر عملاق
+    st.button("TAP HERE", on_click=count_breath)
     
     if st.session_state.start_time:
         elapsed = time.time() - st.session_state.start_time
         remaining = max(0, 15 - int(elapsed))
-        st.metric("Time Left", f"{remaining}s")
-        st.write(f"Breaths: {st.session_state.count}")
+        st.subheader(f"⏱ Time Left: {remaining}s")
+        st.write(f"🔢 Count: {st.session_state.count}")
         
         if remaining > 0:
             time.sleep(0.1)
@@ -71,10 +65,10 @@ if not st.session_state.finished:
             st.rerun()
 else:
     final_rr = st.session_state.count * 4
-    st.success("Finished!")
-    st.metric("Final Respiratory Rate", f"{final_rr} bpm")
+    st.balloons()
+    st.success(f"Final Result: {final_rr} bpm")
     
-    if st.button("Restart"):
+    if st.button("Restart Counter"):
         st.session_state.count = 0
         st.session_state.start_time = None
         st.session_state.finished = False
